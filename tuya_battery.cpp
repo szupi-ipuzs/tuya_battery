@@ -1,5 +1,3 @@
-#pragma once
-
 #include "tuya_battery.h"
 
 namespace esphome::tuya_battery
@@ -10,9 +8,9 @@ static const char *const TAG = "tuya_batt";
 void TuyaBatteryComponent::setup()
 {
 #ifndef USE_ADC_SENSOR_VCC
-  this->adc_pin->setup();
+  this->adc_pin_->setup();
 #endif  // !USE_ADC_SENSOR_VCC
-  this->switch_pin->digital_write(false);
+  this->switch_pin_->digital_write(false);
 
    // force initial read
    this->next_state_change_ts_ = millis();
@@ -25,10 +23,10 @@ void TuyaBatteryComponent::dump_config()
 #ifdef USE_ADC_SENSOR_VCC
   ESP_LOGCONFIG(TAG, "  ADC Pin: VCC");
 #else   // USE_ADC_SENSOR_VCC
-  LOG_PIN("  ADC Pin: ", this->adc_pin);
+  LOG_PIN("  ADC Pin: ", this->adc_pin_);
 #endif  // USE_ADC_SENSOR_VCC
 
-   LOG_PIN("  Switch Pin: ", this->switch_pin);
+   LOG_PIN("  Switch Pin: ", this->switch_pin_);
    ESP_LOGCONFIG(TAG, "  VRef: %.2f mV", this->vref_);
    ESP_LOGCONFIG(TAG, "  VDivider: %.2f", this->vdivider_);
    ESP_LOGCONFIG(TAG, "  Max Battery Voltage: %.2f mV", this->maxbatt_);
@@ -45,28 +43,28 @@ void TuyaBatteryComponent::loop()
 
   if (state_ == State::IDLE)
   {
-    if (now >= next_state_change_ts_)
+    if (now >= this->next_state_change_ts_)
     {
       state_ = State::STABILIZING;
-      next_state_change_ts_ = millis() + this->stabilizingTimeMs_;
+      this->next_state_change_ts_ = millis() + this->stabilizeTimeMs_;
       enable_measurement_();
     }
   }
   else if (state_ == State::STABILIZING)
   {
-    if (now >= next_state_change_ts_)
+    if (now >= this->next_state_change_ts_)
     {
       state_ = State::MEASURING;
-      next_state_change_ts_ = now + this->measureTimeMs_;
+      this->next_state_change_ts_ = now + this->measureTimeMs_;
     }
   }
   else if (state_ == State::MEASURING)
   {
     add_sample_();
-    if (now >= next_state_change_ts_)
+    if (now >= this->next_state_change_ts_)
     {
       state_ = State::IDLE;
-      next_state_change_ts_ = now + this->pollTimeSeconds_ * 1000u;
+      this->next_state_change_ts_ = now + this->pollTimeSeconds_ * 1000u;
       finish_measurement_();
     }
   }

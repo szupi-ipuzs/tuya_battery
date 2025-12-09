@@ -26,8 +26,6 @@ CONF_MAX_BATTERY_VOLTAGE = "max_battery_voltage"
 CONF_MIN_BATTERY_VOLTAGE = "min_battery_voltage"
 CONF_ADC_BITS = "adc_bits"
 
-DEPENDENCIES = ["adc"]
-
 tuya_battery_ns = cg.esphome_ns.namespace("tuya_battery")
 TuyaBatteryComponent = tuya_battery_ns.class_("TuyaBatteryComponent", cg.Component)
 
@@ -36,7 +34,7 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(TuyaBatteryComponent),
             cv.Required(CONF_ADC_PIN): validate_adc_pin,
-            cv.Required(CONF_SWITCH_PIN): pins.gpio_output_pin_schema,
+            cv.Required(CONF_SWITCH_PIN): pins.internal_gpio_output_pin_schema,
             cv.Required(CONF_POLL_INTERVAL): cv.positive_time_period_milliseconds,
             cv.Required(CONF_STABILIZE_TIME): cv.positive_time_period_milliseconds,
             cv.Required(CONF_MEASURE_TIME): cv.positive_time_period_milliseconds,
@@ -65,7 +63,9 @@ CONFIG_SCHEMA = (
 )
 
 async def to_code(config):
-    adc_pin = await config[CONF_ADC_PIN]
+    if config[CONF_ADC_PIN] == "VCC":
+        cg.add_define("USE_ADC_SENSOR_VCC")
+    adc_pin = await cg.gpio_pin_expression(config[CONF_ADC_PIN])
     switch_pin = await cg.gpio_pin_expression(config[CONF_SWITCH_PIN])
     var = cg.new_Pvariable(config[CONF_ID],
                            config[CONF_POLL_INTERVAL],
@@ -79,15 +79,15 @@ async def to_code(config):
     if vdivider := config.get(CONF_VDIVIDER):
         cg.add(var.set_vdivider(vdivider))
     if max_batt := config.get(CONF_MAX_BATTERY_VOLTAGE):
-        cg.add(var.set_max_battery_voltage(max_batt))
+        cg.add(var.set_maxbatt(max_batt))
     if min_batt := config.get(CONF_MIN_BATTERY_VOLTAGE):
-        cg.add(var.set_min_battery_voltage(min_batt))
+        cg.add(var.set_minbatt(min_batt))
     if adc_bits := config.get(CONF_ADC_BITS):
         cg.add(var.set_adc_bits(adc_bits))
 
     if battery_level_config := config.get(CONF_BATTERY_LEVEL):
         sens = await sensor.new_sensor(battery_level_config)
-        cg.add(var.set_battery_level(sens))
+        cg.add(var.set_level_sensor(sens))
     if battery_voltage_config := config.get(CONF_BATTERY_VOLTAGE):
         sens = await sensor.new_sensor(battery_voltage_config)
-        cg.add(var.set_battery_voltage(sens))
+        cg.add(var.set_voltage_sensor(sens))

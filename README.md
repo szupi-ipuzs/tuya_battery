@@ -19,30 +19,31 @@ Apart from the pinout above you need to know the following:
 # Example config
 
 ``` yaml
-tuya_battery:
-  adc_pin: P23
-  switch_pin: P14
-  vref: 2400
-  vdivider: 2.29
-  min_battery_voltage: 2.0
-  max_battery_voltage: 3.0
-  adc_bits: 12
-  poll_interval: 30s
-  stabilize_time: 500ms
-  measure_time: 100ms
-  battery_level:
-    name: "Battery Level"
-    unit_of_measurement: "%"
-    accuracy_decimals: 0
-    device_class: "battery"
-    state_class: "measurement"
-    entity_category: "diagnostic"
-  battery_voltage:
-    name: "Battery Voltage"
-    unit_of_measurement: "V"
-    accuracy_decimals: 2
-    device_class: "battery"
-    state_class: "measurement"
-    entity_category: "diagnostic"
+sensor:
+  - platform: tuya_battery
+    adc_pin: P23
+    switch_pin: P14
+    vref: 2400
+    vdivider: 2.29
+    min_battery_voltage: 2.0
+    max_battery_voltage: 3.0
+    adc_bits: 12
+    poll_interval: 30s
+    stabilize_time: 500ms
+    measure_time: 100ms
+    battery_level:
+      name: "Battery Level"
+      unit_of_measurement: "%"
+      accuracy_decimals: 0
+      device_class: "battery"
+      state_class: "measurement"
+      entity_category: "diagnostic"
+    battery_voltage:
+      name: "Battery Voltage"
+      unit_of_measurement: "V"
+      accuracy_decimals: 2
+      device_class: "battery"
+      state_class: "measurement"
+      entity_category: "diagnostic"
 
 ```

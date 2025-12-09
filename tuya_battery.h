@@ -18,7 +18,7 @@ public:
   TuyaBatteryComponent(const uint32_t pollTimeSeconds,
                  const uint32_t stabilizeTimeMs,
                  const uint32_t measureTimeMs,
-                 GPIOPin *adc_pin, InternalGPIOPin *switch_pin):
+                 InternalGPIOPin *adc_pin, InternalGPIOPin *switch_pin):
   pollTimeSeconds_(pollTimeSeconds),
   stabilizeTimeMs_(stabilizeTimeMs),
   measureTimeMs_(measureTimeMs),
@@ -47,6 +47,7 @@ protected:
 
   void enable_measurement_();
   void finish_measurement_();
+  void add_sample_();
 
   static const std::size_t MAX_SAMPLES_ = 10u;
 
@@ -54,7 +55,7 @@ protected:
   const uint32_t stabilizeTimeMs_;
   const uint32_t measureTimeMs_;
 
-  GPIOPin *adc_pin_{nullptr};
+  InternalGPIOPin *adc_pin_{nullptr};
   InternalGPIOPin *switch_pin_{nullptr};
   float vref_{2400.0f};
   float vdivider_{2.29f};
